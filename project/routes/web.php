@@ -26,12 +26,10 @@ use App\Http\Controllers\FortuneWheelController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\SystemAuditController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Http\Controllers\PageController;
 
 
-Route::get('/csrf-token', function () {
-    return response()->json(['token' => csrf_token()]);
-})->name('csrf.token');
+Route::get('/csrf-token', [PageController::class, 'csrfToken'])->name('csrf.token');
 
 Route::middleware([
     'auth:sanctum',
@@ -173,9 +171,7 @@ Route::middleware([
 
     Route::resource('category', CategoryController::class)->only('index');
 
-    Route::get('/dashboard', function () {
-        return redirect()->route('sections.main');
-    })->name('dashboard');
+    Route::get('/dashboard', [PageController::class, 'dashboard'])->name('dashboard');
 
     Route::get('/account', [UserController::class, 'account'])->name('account');
     Route::post('/account/profile', [UserController::class, 'updateAccountProfile'])->name('account.profile.update');
@@ -184,24 +180,18 @@ Route::middleware([
 });
 
 
-Route::get('terms', fn () => Inertia::render('Legal', ['type' => 'terms']))->name('legal.terms');
-Route::get('privacy', fn () => Inertia::render('Legal', ['type' => 'privacy']))->name('legal.privacy');
-Route::get('user-agreement', fn () => Inertia::render('Legal', ['type' => 'agreement']))->name('legal.agreement');
+Route::get('terms', [PageController::class, 'terms'])->name('legal.terms');
+Route::get('privacy', [PageController::class, 'privacy'])->name('legal.privacy');
+Route::get('user-agreement', [PageController::class, 'userAgreement'])->name('legal.agreement');
 
 Route::get('sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
 Route::get('robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
 
-Route::get('/', function () {
-    return redirect()->route('sections.main');
-});
+Route::get('/', [PageController::class, 'home']);
 
-Route::get('/welcome', function () {
-    return Inertia::render('Welcome');
-})->name('welcome');
+Route::get('/welcome', [PageController::class, 'welcome'])->name('welcome');
 
-Route::get('about', function () {
-    return Inertia::render('About');
-})->name('about');
+Route::get('about', [PageController::class, 'about'])->name('about');
 
 Route::get('main', [SectionController::class, 'main'])->name('sections.main');
 Route::get('sections/{section}', [SectionController::class, 'getChildren'])->name('sections.show');

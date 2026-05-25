@@ -6,19 +6,82 @@
 - Composer.
 - Node غير مطلوب على الاستضافة إذا رفعت النسخة الحالية لأنها تحتوي `public/build` جاهز.
 
-## 2) رفع الملفات
-ارفع محتويات المشروع إلى:
+## 2) رفع الملفات (الطريقة الآمنة - مُوصى بها)
+
+### الطريقة المُوصى بها: Laravel خارج public_html
+
 ```text
-public_html
+/home/USERNAME/
+├── sh7nle/              ← ملفات Laravel كلها هنا (خارج public_html)
+│   ├── app/
+│   ├── bootstrap/
+│   ├── config/
+│   ├── database/
+│   ├── routes/
+│   ├── storage/
+│   ├── vendor/
+│   ├── .env
+│   └── artisan
+│
+└── public_html/         ← محتوى مجلد public/ فقط هنا
+    ├── index.php        ← عدّل المسارات فيه ليشير إلى ../sh7nle/
+    ├── build/
+    ├── images/
+    ├── storage -> ../sh7nle/storage/app/public
+    ├── .htaccess
+    └── favicon.ico
 ```
 
-النسخة تحتوي ملف `.htaccess` في جذر المشروع يحوّل الطلبات إلى مجلد `public`.
+عدّل `public_html/index.php` ليشير للمسار الصحيح:
+```php
+require __DIR__.'/../sh7nle/vendor/autoload.php';
+$app = require_once __DIR__.'/../sh7nle/bootstrap/app.php';
+```
 
-الأفضل أمنيًا إن أمكن:
-- ملفات Laravel خارج `public_html`
-- ومحتوى مجلد `public` فقط داخل `public_html`
+### الطريقة البديلة: المشروع كامل داخل public_html
 
-لكن لو الاستضافة المشتركة لا تسمح، ارفع المشروع كاملًا داخل `public_html` مع `.htaccess` الموجود.
+**⚠️ أقل أماناً** - استخدمها فقط إذا الاستضافة لا تسمح بالطريقة الأولى.
+
+ارفع المشروع كاملاً داخل `public_html` واستخدم ملف `.htaccess` الجذري الموجود.
+
+**مهم جداً:** تأكد من وجود `.htaccess` في جذر المشروع (ليس داخل public/) يحتوي على حمايات الملفات الحساسة:
+
+```apache
+# Block access to sensitive files and directories
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block direct access to sensitive files
+    RewriteRule ^\.env$ - [F,L]
+    RewriteRule ^composer\.(json|lock)$ - [F,L]
+    RewriteRule ^package(-lock)?\.json$ - [F,L]
+    RewriteRule ^vite\.config\.js$ - [F,L]
+    RewriteRule ^artisan$ - [F,L]
+    RewriteRule ^phpunit\.xml$ - [F,L]
+
+    # Block access to sensitive directories
+    RewriteRule ^app/ - [F,L]
+    RewriteRule ^bootstrap/ - [F,L]
+    RewriteRule ^config/ - [F,L]
+    RewriteRule ^database/ - [F,L]
+    RewriteRule ^routes/ - [F,L]
+    RewriteRule ^storage/ - [F,L]
+    RewriteRule ^vendor/ - [F,L]
+    RewriteRule ^resources/ - [F,L]
+    RewriteRule ^tests/ - [F,L]
+    RewriteRule ^docs/ - [F,L]
+
+    # Route everything else to public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Additional protection for specific file types
+<FilesMatch "\.(env|log|sql|sqlite)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+```
 
 ## 3) إعداد ملف .env
 انسخ:
@@ -34,6 +97,10 @@ DB_USERNAME=
 DB_PASSWORD=
 SESSION_DOMAIN=.YOUR-DOMAIN.COM
 SANCTUM_STATEFUL_DOMAINS=YOUR-DOMAIN.COM,www.YOUR-DOMAIN.COM
+KAZAWALLET_API_KEY=your_key_here
+KAZAWALLET_SECRET=your_secret_here
+KAZAWALLET_EMAIL=your_email_here
+KAZAWALLET_REF_TOKEN=your_ref_token_here
 ```
 
 ثم أنشئ مفتاح التطبيق:
@@ -49,9 +116,10 @@ php artisan storage:link
 php artisan migrate --seed --force
 php artisan optimize:clear
 php artisan config:cache
-php artisan route:cache
 php artisan view:cache
 ```
+
+**ملاحظة:** لا تستخدم `php artisan route:cache` لأن المشروع يحتوي Closure routes. إذا أردت تسريع الراوتات، حوّل الـ Closure routes لـ Controller methods أولاً.
 
 إذا `storage:link` فشل على الاستضافة المشتركة، أنشئ symlink من File Manager إن أمكن:
 ```text
@@ -96,7 +164,10 @@ https://YOUR-DOMAIN.COM
 - لوحة الإدارة.
 
 ## 7) ملاحظات أمنية
-- لا ترفع `.env` حقيقي إلى GitHub.
-- لا تترك `APP_DEBUG=true` في الإنتاج.
-- لا تستخدم SQLite في الإنتاج.
-- استخدم MySQL من Hostinger.
+- ❌ لا ترفع `.env` حقيقي إلى GitHub.
+- ❌ لا تترك `APP_DEBUG=true` في الإنتاج.
+- ❌ لا تستخدم SQLite في الإنتاج.
+- ✅ استخدم MySQL من Hostinger.
+- ✅ تأكد أن `.htaccess` الجذري يحظر الوصول للملفات الحساسة.
+- ✅ استخدم HTTPS (Let's Encrypt مجاني من Hostinger).
+- ✅ تأكد أن `storage/` لديها صلاحيات الكتابة (775).
