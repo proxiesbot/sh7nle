@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
+import { useCallback, useMemo, useState, useTransition } from 'react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { BadgeCheck, Check, ChevronDown, ChevronUp, Clock3, Copy, PackageSearch, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -49,12 +49,15 @@ function formatDate(date) {
 export default function Payments({ payments }) {
     const [copiedKey, setCopiedKey] = useState('');
     const [expandedId, setExpandedId] = useState(null);
+    const [, startTransition] = useTransition();
 
-    const toggleExpanded = (id) => {
-        setExpandedId((current) => (current === id ? null : id));
-    };
+    const toggleExpanded = useCallback((id) => {
+        startTransition(() => {
+            setExpandedId((current) => (current === id ? null : id));
+        });
+    }, []);
 
-    const copyToClipboard = async (key, text) => {
+    const copyToClipboard = useCallback(async (key, text) => {
         if (!text) return;
 
         try {
@@ -73,7 +76,9 @@ export default function Payments({ payments }) {
 
         setCopiedKey(key);
         window.setTimeout(() => setCopiedKey(''), 1600);
-    };
+    }, []);
+
+    const paymentsList = useMemo(() => payments?.data || [], [payments?.data]);
 
     return (
         <PublicLayout>
@@ -90,7 +95,7 @@ export default function Payments({ payments }) {
             </section>
 
             <div className="sh7nle-accordion-list mt-5 space-y-3">
-                {(payments?.data || []).map((payment) => {
+                {paymentsList.map((payment) => {
                     const status = statusMap[payment.status] || statusMap[0];
                     const StatusIcon = status.icon;
                     const deliveryText = normalizeDeliveryText(payment);
@@ -101,7 +106,7 @@ export default function Payments({ payments }) {
                     const title = payment.card?.name || 'منتج غير معروف';
 
                     return (
-                        <article key={payment.id} className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+                        <article key={payment.id} className="smooth-list-item overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
                             <button
                                 type="button"
                                 onClick={() => toggleExpanded(payment.id)}
@@ -183,7 +188,7 @@ export default function Payments({ payments }) {
                     );
                 })}
 
-                {(payments?.data || []).length === 0 && <div className="rounded-[28px] border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">لا توجد طلبات حتى الآن.</div>}
+                {paymentsList.length === 0 && <div className="rounded-[28px] border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">لا توجد طلبات حتى الآن.</div>}
             </div>
 
             {payments?.links && payments.links.length > 3 && (

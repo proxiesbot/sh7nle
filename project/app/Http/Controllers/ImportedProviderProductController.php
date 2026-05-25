@@ -1704,6 +1704,20 @@ class ImportedProviderProductController extends Controller
 
         $trailNames = collect($cleanTrail($trail));
 
+        // For SW Games products, ensure the categoryName (game name) is always part of the trail
+        // even if it wasn't explicitly in the navigation trail. This ensures products land
+        // in their correct game sub-section (e.g. "ألعاب / Free Fire") rather than the parent.
+        $providerType = (string) ($normalizedProduct['providerProductType'] ?? $fallbackProduct['providerProductType'] ?? '');
+        $categoryName = trim((string) ($normalizedProduct['categoryName'] ?? $fallbackProduct['categoryName'] ?? ''));
+        if ($providerType === 'swgames' && $categoryName !== '') {
+            $lastTrailNormalized = $trailNames->isNotEmpty() ? $normalizeComparable($trailNames->last()) : '';
+            $categoryNormalized = $normalizeComparable($categoryName);
+            if ($categoryNormalized !== '' && $lastTrailNormalized !== $categoryNormalized) {
+                $trailNames->push($categoryName);
+            }
+            return $cleanTrail($trailNames->all());
+        }
+
         $categoryCandidates = collect([
             $normalizedProduct['categoryPath'] ?? null,
             $normalizedProduct['category_path'] ?? null,

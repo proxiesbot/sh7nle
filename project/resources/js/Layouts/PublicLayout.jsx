@@ -181,8 +181,9 @@ export default function PublicLayout({ children }) {
 
                             {isOptionsOpen && (
                                 <>
-                                    <button type="button" aria-label="close menu overlay" onClick={closeMenu} className="fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-[2px]" />
-                                    <div dir={isArabic ? 'rtl' : 'ltr'} className={`fixed ${drawerPositionClass} top-0 z-50 h-screen w-[88vw] max-w-[360px] overflow-y-auto border-slate-200 bg-white px-3 pb-5 pt-5 shadow-[0_24px_70px_rgba(15,23,42,0.22)] dark:border-slate-700 dark:bg-slate-900 sm:top-16 sm:h-[calc(100vh-5rem)] sm:rounded-[28px]`}>
+                                    <button type="button" aria-label="close menu overlay" onClick={closeMenu} className="fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-[2px] transition-opacity duration-200" />
+                                    <div dir={isArabic ? 'rtl' : 'ltr'} className={`fixed ${drawerPositionClass} top-0 z-50 flex h-screen w-[88vw] max-w-[360px] flex-col border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)] dark:border-slate-700 dark:bg-slate-900 sm:top-16 sm:h-[calc(100vh-5rem)] sm:rounded-[28px] animate-[sh7nleDrawerSlideIn_200ms_ease-out_both]`}>
+                                        <div className="flex-1 overflow-y-auto overscroll-contain px-3 pb-5 pt-5">
                                         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-sky-50 via-white to-violet-50 p-4 dark:border-slate-700 dark:from-slate-800 dark:via-slate-900 dark:to-slate-900">
                                             <div className="flex items-center justify-between gap-3">
                                                 <div className={alignClass}>
@@ -290,6 +291,7 @@ export default function PublicLayout({ children }) {
                                             </Link>
                                         ) : null}
                                     </div>
+                                </div>
                                 </>
                             )}
                         </div>
@@ -312,6 +314,8 @@ export default function PublicLayout({ children }) {
                             <div className="hidden truncate text-xs text-slate-500 dark:text-slate-400 sm:block">{t('storeTagline')}</div>
                         </div>
                     </Link>
+
+
                 </div>
             </header>
 
