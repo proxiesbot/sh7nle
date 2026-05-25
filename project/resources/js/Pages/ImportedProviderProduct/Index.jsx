@@ -131,7 +131,7 @@ export default function Index({ products, providerSources = [], importSections =
                     },
                 } : null);
             }
-        }, 650);
+        }, 350);
     };
 
     const scheduleNextAllImportStep = (jobId) => {
@@ -163,7 +163,7 @@ export default function Index({ products, providerSources = [], importSections =
                     },
                 } : null);
             }
-        }, 750);
+        }, 400);
     };
 
     const scheduleNextScanStep = (jobId) => {
@@ -194,7 +194,7 @@ export default function Index({ products, providerSources = [], importSections =
                     },
                 } : null);
             }
-        }, 700);
+        }, 400);
     };
 
     const startCategoryScan = async () => {
