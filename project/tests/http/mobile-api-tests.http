@@ -1,0 +1,347 @@
+### ===========================================
+### MOBILE API TESTS - Laravel Sanctum
+### ===========================================
+###
+### These endpoints are designed for mobile apps (iOS, Android, React Native, Flutter)
+### Uses token-based authentication (no cookies, no CSRF)
+###
+### FEATURES:
+### ✅ Stateless authentication
+### ✅ Token-based (Sanctum)
+### ✅ No CSRF tokens required
+### ✅ JSON responses
+### ✅ 2FA support
+###
+### ===========================================
+
+@baseUrl = http://localhost:8000
+@apiPrefix = /api
+
+# Variables to store tokens (update after login)
+@token =1|2IXbUbpTeVCVTLn27yv0aDAJbkEOjjPR696z9CDY83ed298c 
+@userId = 
+
+
+### ===========================================
+### 1. REGISTER (Mobile)
+### ===========================================
+
+### Test 1.1: Successful Registration
+POST {{baseUrl}}{{apiPrefix}}/register HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Mobile User",
+  "email": "mobile@example.com",
+  "password": "Password123!",
+  "password_confirmation": "Password123!"
+}
+
+### Expected Response:
+### 201 Created
+### {
+###   "message": "User registered successfully",
+###   "user": { ... },
+###   "token": "1|XXXXX..."  <- Copy this token!
+### }
+
+###
+
+### Test 1.2: Registration - Validation Errors
+POST {{baseUrl}}{{apiPrefix}}/register HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "",
+  "email": "invalid-email",
+  "password": "123"
+}
+
+###
+
+### Test 1.3: Registration - Duplicate Email
+POST {{baseUrl}}{{apiPrefix}}/register HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Duplicate User",
+  "email": "mobile@example.com",
+  "password": "Password123!",
+  "password_confirmation": "Password123!"
+}
+
+###
+
+
+### ===========================================
+### 2. LOGIN (Mobile)
+### ===========================================
+
+### Test 2.1: Successful Login (No 2FA)
+POST {{baseUrl}}{{apiPrefix}}/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "mobile@example.com",
+  "password": "Password123!"
+}
+
+### Expected Response:
+### 200 OK
+### {
+###   "message": "Login successful",
+###   "user": { ... },
+###   "token": "2|XXXXX..."  <- Copy this token!
+### }
+
+###
+
+### Test 2.2: Login - Invalid Credentials
+POST {{baseUrl}}{{apiPrefix}}/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "mobile@example.com",
+  "password": "WrongPassword123!"
+}
+
+###
+
+### Test 2.3: Login - User with 2FA Enabled
+### (First enable 2FA for a user, then test)
+POST {{baseUrl}}{{apiPrefix}}/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "user-with-2fa@example.com",
+  "password": "Password123!"
+}
+
+### Expected Response:
+### 200 OK
+### {
+###   "message": "Two-factor authentication required",
+###   "requires_2fa": true,
+###   "user_id": 123
+### }
+
+###
+
+
+### ===========================================
+### 3. TWO-FACTOR AUTHENTICATION
+### ===========================================
+
+### Test 3.1: Verify 2FA Code
+POST {{baseUrl}}{{apiPrefix}}/verify-2fa HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "user_id": 123,
+  "code": "123456"
+}
+
+### Replace "123456" with actual code from Google Authenticator
+
+###
+
+### Test 3.2: Verify 2FA - Invalid Code
+POST {{baseUrl}}{{apiPrefix}}/verify-2fa HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "user_id": 123,
+  "code": "000000"
+}
+
+###
+
+
+### ===========================================
+### 4. AUTHENTICATED REQUESTS
+### ===========================================
+### IMPORTANT: Copy token from login/register response
+### and paste it in the @token variable at the top!
+
+### Test 4.1: Get Current User Profile
+GET {{baseUrl}}{{apiPrefix}}/me HTTP/1.1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### Test 4.2: Get User (Alternative Endpoint)
+GET {{baseUrl}}{{apiPrefix}}/user HTTP/1.1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### Test 4.3: Authenticated Request - Invalid Token
+GET {{baseUrl}}{{apiPrefix}}/me HTTP/1.1
+Accept: application/json
+Authorization: Bearer invalid_token_here
+
+### Expected: 401 Unauthorized
+
+###
+
+### Test 4.4: Authenticated Request - No Token
+GET {{baseUrl}}{{apiPrefix}}/me HTTP/1.1
+Accept: application/json
+
+### Expected: 401 Unauthorized
+
+###
+
+
+### ===========================================
+### 5. LOGOUT
+### ===========================================
+
+### Test 5.1: Logout (Revoke Current Token)
+POST {{baseUrl}}{{apiPrefix}}/logout HTTP/1.1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Expected Response:
+### 200 OK
+### {
+###   "message": "Logged out successfully"
+### }
+
+###
+
+### Test 5.2: Logout - No Token
+POST {{baseUrl}}{{apiPrefix}}/logout HTTP/1.1
+Accept: application/json
+
+### Expected: 401 Unauthorized
+
+###
+
+
+### ===========================================
+### TESTING WORKFLOW FOR MOBILE API
+### ===========================================
+###
+### 1. REGISTER NEW USER
+###    - Run Test 1.1
+###    - Copy the token from response
+###    - Paste it in @token variable at top of file
+###
+### 2. TEST AUTHENTICATED ENDPOINTS
+###    - Run Test 4.1 (Get current user)
+###    - Should return user data
+###
+### 3. LOGOUT
+###    - Run Test 5.1
+###    - Token is now invalid
+###
+### 4. LOGIN AGAIN
+###    - Run Test 2.1
+###    - Get new token
+###    - Update @token variable
+###
+### 5. TEST OTHER FEATURES
+###    - Use the token in Authorization header
+###    - All protected endpoints require: Authorization: Bearer {token}
+###
+### ===========================================
+
+
+### ===========================================
+### INTEGRATION WITH MOBILE APP
+### ===========================================
+###
+### Example for React Native / Flutter / Swift / Kotlin:
+###
+### 1. REGISTRATION
+###    POST http://yourapi.com/api/register
+###    Body: { name, email, password, password_confirmation }
+###    Response: { token, user }
+###    -> Save token in secure storage (AsyncStorage, SecureStore, Keychain)
+###
+### 2. LOGIN
+###    POST http://yourapi.com/api/login
+###    Body: { email, password }
+###    Response: { token, user } OR { requires_2fa: true, user_id }
+###    -> If requires_2fa, show 2FA input screen
+###    -> Save token in secure storage
+###
+### 3. 2FA VERIFICATION
+###    POST http://yourapi.com/api/verify-2fa
+###    Body: { user_id, code }
+###    Response: { token, user }
+###    -> Save token in secure storage
+###
+### 4. AUTHENTICATED REQUESTS
+###    GET/POST http://yourapi.com/api/*
+###    Headers: { Authorization: "Bearer {token}" }
+###    
+### 5. LOGOUT
+###    POST http://yourapi.com/api/logout
+###    Headers: { Authorization: "Bearer {token}" }
+###    -> Remove token from storage
+###
+### ===========================================
+
+
+### ===========================================
+### RESPONSE FORMATS
+### ===========================================
+###
+### SUCCESS (200/201):
+### {
+###   "message": "Success message",
+###   "user": { id, name, email, balance, ... },
+###   "token": "1|xxxxx..."
+### }
+###
+### VALIDATION ERROR (422):
+### {
+###   "message": "The given data was invalid.",
+###   "errors": {
+###     "email": ["The email field is required."],
+###     "password": ["The password must be at least 8 characters."]
+###   }
+### }
+###
+### AUTHENTICATION ERROR (401):
+### {
+###   "message": "Unauthenticated."
+### }
+###
+### SERVER ERROR (500):
+### {
+###   "message": "Server Error",
+###   "exception": "..."
+### }
+###
+### ===========================================
+
+
+### ===========================================
+### NOTES FOR MOBILE DEVELOPERS
+### ===========================================
+###
+### ✅ NO CSRF tokens needed (stateless API)
+### ✅ NO cookies needed (token-based)
+### ✅ Token format: "Bearer {token}"
+### ✅ Token should be stored securely on device
+### ✅ Include token in Authorization header for all protected routes
+### ✅ Handle 401 responses -> redirect to login
+### ✅ Handle 422 responses -> show validation errors
+### ✅ Tokens don't expire by default (configure in sanctum.php if needed)
+### ✅ User can have multiple tokens (multiple devices)
+### ✅ Logout only revokes current token (other devices stay logged in)
+###
+### ===========================================

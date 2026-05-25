@@ -1,0 +1,2 @@
+تم إصلاح migration الخاصة بعجلة الحظ حتى لا تفشل إذا كان جدول wheel_prizes موجودًا مسبقًا.
+شغل: php artisan optimize:clear ثم php artisan migrate --seed
