@@ -116,10 +116,11 @@ php artisan storage:link
 php artisan migrate --seed --force
 php artisan optimize:clear
 php artisan config:cache
+php artisan route:cache
 php artisan view:cache
 ```
 
-**ملاحظة:** لا تستخدم `php artisan route:cache` لأن المشروع يحتوي Closure routes. إذا أردت تسريع الراوتات، حوّل الـ Closure routes لـ Controller methods أولاً.
+**ملاحظة:** بعد PR #2، تم تحويل كل الـ Closure routes إلى Controller methods ويجب أن يعمل `php artisan route:cache` بدون مشاكل. إذا فشل على Hostinger لأي سبب، شغّل `php artisan route:clear` وتابع النشر بدون route caching.
 
 إذا `storage:link` فشل على الاستضافة المشتركة، أنشئ symlink من File Manager إن أمكن:
 ```text
