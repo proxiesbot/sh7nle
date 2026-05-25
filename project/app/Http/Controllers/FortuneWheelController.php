@@ -38,23 +38,22 @@ class FortuneWheelController extends Controller
 
     public function admin(Request $request): Response
     {
-        $users = Schema::hasTable('users')
+        $usersWithSpins = Schema::hasTable('wheel_spins')
             ? User::query()
                 ->withCount(['wheelSpins as active_wheel_spins_count' => fn ($query) => $query->active()])
+                ->having('active_wheel_spins_count', '>', 0)
                 ->orderByDesc('active_wheel_spins_count')
                 ->orderBy('name')
-                ->take(500)
+                ->take(100)
                 ->get(['id', 'name', 'email', 'balance'])
             : collect();
 
-        $usersWithSpins = $users->filter(fn ($user) => (int) $user->active_wheel_spins_count > 0)->values();
-
         $logs = Schema::hasTable('wheel_spin_logs')
-            ? WheelSpinLog::query()->with('user')->latest()->paginate(30)
+            ? WheelSpinLog::query()->with('user:id,name,email')->latest()->paginate(30)
             : null;
 
         return Inertia::render('Wheel/Admin', [
-            'users' => $users,
+            'users' => $usersWithSpins,
             'usersWithSpins' => $usersWithSpins,
             'logs' => $logs,
             'stats' => [

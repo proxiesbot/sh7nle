@@ -601,3 +601,85 @@ body.sh7nle-global-text-editing :where(h1,h2,h3,h4,h5,h6,p,span,a,button,label,d
     .sh7nle-soft-hover { transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease; }
     .sh7nle-soft-hover:hover { transform: translateY(-1px); }
 }
+
+/* ============================================
+   Sh7nle Mobile Enhancement v28_57
+   ============================================ */
+
+/* Better touch targets on mobile */
+@media (max-width: 640px) {
+    /* Ensure minimum tap target size (44px per WCAG) */
+    button:not([class*="h-"]),
+    a:not([class*="h-"]) {
+        min-height: 44px;
+    }
+
+    /* Fix modals on small screens */
+    .fixed.inset-0 > div {
+        max-height: 100dvh;
+    }
+
+    /* Prevent content overflow from breaking layout */
+    .break-all {
+        word-break: break-all;
+    }
+
+    /* Better spacing on mobile cards */
+    .grid.gap-3 {
+        gap: 0.5rem;
+    }
+
+    /* Ensure sidebar doesn't cause horizontal scroll */
+    aside[class*="fixed"] {
+        max-width: 86vw;
+    }
+}
+
+/* Safe area insets for iOS notch devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .fixed.bottom-0,
+    .sticky.bottom-0 {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .fixed.top-0,
+    .sticky.top-0 {
+        padding-top: env(safe-area-inset-top);
+    }
+}
+
+/* Better scrollbar styling for mobile tables */
+.sh7nle-mobile-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+
+.sh7nle-mobile-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sh7nle-mobile-scroll::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 4px;
+}
+
+.dark .sh7nle-mobile-scroll::-webkit-scrollbar-thumb {
+    background: rgba(71, 85, 105, 0.6);
+}
+
+/* Improve focus visibility for accessibility */
+:focus-visible {
+    outline: 2px solid rgba(14, 165, 233, 0.7);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Fix RTL text alignment in form inputs */
+[dir="rtl"] input[type="number"] {
+    text-align: right;
+}
+
+[dir="rtl"] input[type="tel"] {
+    text-align: right;
+    direction: ltr;
+    unicode-bidi: embed;
+}
