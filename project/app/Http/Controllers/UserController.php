@@ -110,6 +110,8 @@ class UserController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
+        abort_unless($request->user()?->hasAnyRole(['Super-Admin', 'admin']), 403);
+
         $validated = $request->validate([
             'balance' => ['nullable', 'numeric', 'min:0'],
             'role' => ['nullable', 'string', 'exists:roles,name'],
@@ -188,6 +190,8 @@ class UserController extends Controller
 
     public function destroy(Request $request, User $user): RedirectResponse
     {
+        abort_unless($request->user()?->hasAnyRole(['Super-Admin', 'admin']), 403);
+
         $user->delete();
 
         return redirect()->route('user.index')->with('success', 'تم حذف المستخدم بنجاح.');
