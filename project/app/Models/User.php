@@ -33,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'customer_level',
         'api_enabled',
         'api_token',
+        'api_token_hash',
         'wheel_spins',
         'referral_rate_percentage',
         'referral_code',
@@ -51,6 +52,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
         'two_factor_recovery_codes',
         'two_factor_secret',
+        'api_token_hash',
     ];
 
     protected $casts = [

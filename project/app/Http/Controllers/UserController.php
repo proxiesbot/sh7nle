@@ -141,7 +141,9 @@ class UserController extends Controller
         $user->api_enabled = (bool) $validated['apiEnabled'];
 
         if ($user->api_enabled && (! $user->api_token || ! empty($validated['regenerateApiToken']))) {
-            $user->api_token = 'sh7nle_' . Str::random(40);
+            $plainToken = 'sh7nle_' . Str::random(40);
+            $user->api_token = $plainToken;
+            $user->api_token_hash = \Illuminate\Support\Facades\Hash::make($plainToken);
         }
 
         if (! $user->referral_code) {
