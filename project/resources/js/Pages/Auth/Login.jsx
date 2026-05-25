@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useForm, Head, Link } from '@inertiajs/react';
 import { Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,10 @@ export default function Login({ status, canResetPassword = true }) {
         remember: false,
     });
 
-    const submit = (e) => {
+    const submit = useCallback((e) => {
         e.preventDefault();
         post(route('login'), { onFinish: () => reset('password') });
-    };
+    }, [data.email, data.password, data.remember]);
 
     const iconSide = isArabic ? 'right-4' : 'left-4';
     const inputPadding = isArabic ? 'pr-12 pl-4 text-right' : 'pl-12 pr-4 text-left';

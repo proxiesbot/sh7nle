@@ -69,19 +69,24 @@ export default function Index({ products, providerSources = [], importSections =
     const jsonRequest = async (url, payload = {}, method = 'POST') => {
         const csrfToken = getCsrfToken();
 
-        const response = await fetch(url, {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
-            },
-            body: method === 'GET' ? undefined : JSON.stringify(payload),
-            credentials: 'same-origin',
-            mode: 'same-origin',
-            referrerPolicy: 'same-origin',
-        });
+        let response;
+        try {
+            response = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+                },
+                body: method === 'GET' ? undefined : JSON.stringify(payload),
+                credentials: 'same-origin',
+                mode: 'same-origin',
+                referrerPolicy: 'same-origin',
+            });
+        } catch (networkError) {
+            throw new Error('تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.');
+        }
 
         if (response.status === 419) {
             throw new Error('انتهت الجلسة أو رمز الحماية غير صالح. حدّث الصفحة وسجّل الدخول من جديد.');
@@ -658,6 +663,13 @@ export default function Index({ products, providerSources = [], importSections =
                                     </div>
                                 )}
                                 {importJob.progress?.error && <div className="mt-3 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-200">{importJob.progress.error}</div>}
+                                {importJob.status === 'failed' && (
+                                    <div className="mt-3 flex justify-end">
+                                        <Button type="button" className="rounded-2xl bg-sky-600 hover:bg-sky-700" onClick={importCategory}>
+                                            إعادة المحاولة
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         )}
 
