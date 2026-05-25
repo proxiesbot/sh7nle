@@ -551,10 +551,15 @@ class DepositController extends Controller
     /**
      * Grant a wheel spin to the user's referrer if they've reached the referral milestone.
      * (3 successful referral deposits = 1 bonus spin for the referrer)
+     * Idempotent: checks wheel_spin_logs to prevent duplicate grants for the same milestone.
      */
     protected function grantReferralWheelSpinIfEligible(User $user): void
     {
         if (! $user->referred_by_user_id) {
+            return;
+        }
+
+        if (! \Illuminate\Support\Facades\Schema::hasTable('wheel_spins')) {
             return;
         }
 
@@ -569,10 +574,38 @@ class DepositController extends Controller
             ->whereHas('deposits', fn ($query) => $query->where('status', 1))
             ->count();
 
-        // Grant spin every 3 qualified referrals
-        if ($qualifiedReferrals > 0 && $qualifiedReferrals % 3 === 0) {
-            FortuneWheelController::grantSpin($referrer, 'referral_milestone', "إحالة {$qualifiedReferrals} مستخدم مؤهل");
+        // Only grant at milestones: 3, 6, 9, 12...
+        if ($qualifiedReferrals <= 0 || $qualifiedReferrals % 3 !== 0) {
+            return;
         }
+
+        // Check if this specific milestone was already granted (idempotency)
+        $milestoneReason = "إحالة {$qualifiedReferrals} مستخدم مؤهل";
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('wheel_spin_logs')) {
+            $alreadyGranted = \App\Models\WheelSpinLog::query()
+                ->where('user_id', $referrer->id)
+                ->where('action', 'grant')
+                ->where('message', $milestoneReason)
+                ->exists();
+
+            if ($alreadyGranted) {
+                return;
+            }
+        } else {
+            // Fallback: check wheel_spins meta for the same reason
+            $alreadyGranted = \App\Models\WheelSpin::query()
+                ->where('user_id', $referrer->id)
+                ->where('source', 'referral_milestone')
+                ->whereJsonContains('meta->reason', $milestoneReason)
+                ->exists();
+
+            if ($alreadyGranted) {
+                return;
+            }
+        }
+
+        FortuneWheelController::grantSpin($referrer, 'referral_milestone', $milestoneReason);
     }
 
     protected function getOrCreateKazawalletMethod(): PaymentMethod

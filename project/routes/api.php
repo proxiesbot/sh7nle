@@ -26,9 +26,7 @@ Route::post('/verify-2fa', [AuthController::class, 'verify2FA'])->middleware('th
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+    Route::get('/user', [AuthController::class, 'me']);
 });
 
 // Webhook route (no auth required)
