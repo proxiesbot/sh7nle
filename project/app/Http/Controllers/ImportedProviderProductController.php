@@ -1704,20 +1704,28 @@ class ImportedProviderProductController extends Controller
 
         $trailNames = collect($cleanTrail($trail));
 
-        // For SW Games products, ensure the categoryName (game name) is always part of the trail
-        // even if it wasn't explicitly in the navigation trail. This ensures products land
-        // in their correct game sub-section (e.g. "ألعاب / Free Fire") rather than the parent.
+        // For SW Games products: the trail sent from the frontend already contains the full path
+        // (e.g. ["ألعاب", "Free Fire"]). We trust it as-is and only ensure the categoryName
+        // (game name) is present. This prevents products from landing in the wrong parent section.
         $providerType = (string) ($normalizedProduct['providerProductType'] ?? $fallbackProduct['providerProductType'] ?? '');
         $categoryName = trim((string) ($normalizedProduct['categoryName'] ?? $fallbackProduct['categoryName'] ?? ''));
-        if ($providerType === 'swgames' && $categoryName !== '') {
-            $lastTrailNormalized = $trailNames->isNotEmpty() ? $normalizeComparable($trailNames->last()) : '';
-            $categoryNormalized = $normalizeComparable($categoryName);
-            if ($categoryNormalized !== '' && $lastTrailNormalized !== $categoryNormalized) {
-                $trailNames->push($categoryName);
+        if ($providerType === 'swgames') {
+            // If categoryName is a real game name (not the fallback "SW Games"), ensure it's in the trail
+            if ($categoryName !== '' && $categoryName !== 'SW Games') {
+                $lastTrailNormalized = $trailNames->isNotEmpty() ? $normalizeComparable($trailNames->last()) : '';
+                $categoryNormalized = $normalizeComparable($categoryName);
+                if ($categoryNormalized !== '' && $lastTrailNormalized !== $categoryNormalized) {
+                    $trailNames->push($categoryName);
+                }
+            }
+            // If trail is empty but we have a categoryName, use it as the trail
+            if ($trailNames->isEmpty() && $categoryName !== '' && $categoryName !== 'SW Games') {
+                $trailNames = collect([$categoryName]);
             }
             return $cleanTrail($trailNames->all());
         }
 
+        // For Shams/generic providers: try to enrich trail from product's categoryName/categoryPath
         $categoryCandidates = collect([
             $normalizedProduct['categoryPath'] ?? null,
             $normalizedProduct['category_path'] ?? null,
@@ -1778,7 +1786,7 @@ class ImportedProviderProductController extends Controller
         // Step 1: import a small batch of already discovered products immediately.
         // Products are saved to imported_provider_products and published to cards during every poll,
         // so a timeout later does not lose what was already processed.
-        $batchSize = max(1, min(6, (int) ($state['batchSize'] ?? 4)));
+        $batchSize = max(1, min(20, (int) ($state['batchSize'] ?? 12)));
         $processedThisRequest = 0;
 
         if (!empty($state['pauseUntil'])) {
@@ -2182,24 +2190,44 @@ class ImportedProviderProductController extends Controller
     {
         $discovered = max((int) ($state['discoveredProducts'] ?? $state['totalProducts'] ?? 0), (int) ($state['processedProducts'] ?? 0));
         $processed = (int) ($state['processedProducts'] ?? 0);
-        $percentage = $discovered > 0 ? min(100, (int) floor(($processed / $discovered) * 100)) : 0;
+        $imported = (int) ($state['importedProducts'] ?? 0);
+        $added = (int) ($state['addedCards'] ?? 0);
+        $updated = (int) ($state['existingCards'] ?? 0);
+        $failed = (int) ($state['failedProducts'] ?? 0);
+        $pendingProducts = count((array) ($state['pendingProducts'] ?? []));
+        $pendingCategories = count((array) ($state['pendingCategories'] ?? []));
+
+        // Use processed/discovered for percentage, but cap at 99% until truly done
+        $status = (string) ($state['status'] ?? 'running');
+        if ($status === 'completed') {
+            $percentage = 100;
+        } elseif ($discovered > 0) {
+            $percentage = min(99, (int) floor(($processed / $discovered) * 100));
+        } else {
+            $percentage = 0;
+        }
+
+        // Display: show imported (successful) count prominently
+        $display = $discovered > 0
+            ? ('تمت معالجة ' . $processed . ' من ' . $discovered . ' | أضيف ' . $added . ' | محدّث ' . $updated)
+            : 'بانتظار الاكتشاف';
 
         return [
             'totalProducts' => $discovered,
             'discoveredProducts' => $discovered,
             'processedProducts' => $processed,
-            'importedProducts' => (int) ($state['importedProducts'] ?? 0),
-            'addedCards' => (int) ($state['addedCards'] ?? 0),
-            'existingCards' => (int) ($state['existingCards'] ?? 0),
-            'failedProducts' => (int) ($state['failedProducts'] ?? 0),
-            'pendingCategories' => count((array) ($state['pendingCategories'] ?? [])),
-            'pendingProducts' => count((array) ($state['pendingProducts'] ?? [])),
+            'importedProducts' => $imported,
+            'addedCards' => $added,
+            'existingCards' => $updated,
+            'failedProducts' => $failed,
+            'pendingCategories' => $pendingCategories,
+            'pendingProducts' => $pendingProducts,
             'scannedCategories' => (int) ($state['scannedCategories'] ?? 0),
             'currentItem' => $state['currentItem'] ?? null,
             'lastMessage' => $state['lastMessage'] ?? null,
             'error' => $state['error'] ?? null,
             'percentage' => $percentage,
-            'display' => $discovered > 0 ? ('مستورد ' . $processed . ' / مكتشف ' . $discovered) : 'بانتظار الاكتشاف',
+            'display' => $display,
         ];
     }
 
