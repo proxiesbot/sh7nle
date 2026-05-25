@@ -85,10 +85,10 @@ export default function Create({ categories }) {
 
                     <div className="flex items-center justify-end gap-4">
                         <Link href={route('subcategory.index')}>
-                            <Button variant="outline" type="button">Cancel</Button>
+                            <Button variant="outline" type="button">إلغاء</Button>
                         </Link>
                         <Button type="submit" disabled={processing} className="bg-purple-600 hover:bg-purple-700">
-                            Create Subcategory
+                            إنشاء التصنيف الفرعي
                         </Button>
                     </div>
                 </form>

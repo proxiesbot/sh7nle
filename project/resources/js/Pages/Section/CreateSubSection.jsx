@@ -72,7 +72,7 @@ export default function CreateSubSection({ section }) {
 
                     <div className="flex items-center justify-end gap-4">
                         <Link href={route('sections.indexAdmin')}>
-                            <Button variant="outline" type="button">Cancel</Button>
+                            <Button variant="outline" type="button">إلغاء</Button>
                         </Link>
                         <Button type="submit" disabled={processing} className="bg-purple-600 hover:bg-purple-700">
                             Create Sub-Section

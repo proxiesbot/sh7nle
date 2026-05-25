@@ -71,9 +71,9 @@ export default function Edit({ category }) {
                     </div>
 
                     <div className="flex items-center justify-end gap-4">
-                        <Button variant="outline" type="button" onClick={() => window.history.back()}>Cancel</Button>
+                        <Button variant="outline" type="button" onClick={() => window.history.back()}>إلغاء</Button>
                         <Button type="submit" disabled={processing} className="bg-purple-600 hover:bg-purple-700">
-                            Update Category
+                            تحديث التصنيف
                         </Button>
                     </div>
                 </form>

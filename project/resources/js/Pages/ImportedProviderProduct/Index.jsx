@@ -585,7 +585,7 @@ export default function Index({ products, providerSources = [], importSections =
                                 <div className="mt-4 grid gap-3 text-xs font-black text-slate-700 dark:text-slate-200 sm:grid-cols-2 lg:grid-cols-4">
                                     <div className="rounded-xl bg-white px-3 py-2 dark:bg-slate-900">الأقسام المكتشفة: {scanJob.progress?.discoveredCategories || 0}</div>
                                     <div className="rounded-xl bg-white px-3 py-2 dark:bg-slate-900">المنتجات المكتشفة: {scanJob.progress?.discoveredProducts || 0}</div>
-                                    <div className="rounded-xl bg-white px-3 py-2 dark:bg-slate-900">تحتاج Player ID: {scanJob.progress?.playerIdProducts || 0}</div>
+                                    <div className="rounded-xl bg-white px-3 py-2 dark:bg-slate-900">تحتاج معرّف لاعب: {scanJob.progress?.playerIdProducts || 0}</div>
                                     <div className="rounded-xl bg-white px-3 py-2 dark:bg-slate-900">غير متوفر: {scanJob.progress?.unavailableProducts || 0}</div>
                                     <div className="rounded-xl bg-white px-3 py-2 dark:bg-slate-900">فئات/قيم داخل المنتجات: {scanJob.progress?.amountProducts || 0}</div>
                                     <div className="rounded-xl bg-white px-3 py-2 dark:bg-slate-900">منتجات باقات: {scanJob.progress?.packageProducts || 0}</div>

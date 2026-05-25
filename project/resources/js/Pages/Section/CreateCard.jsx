@@ -83,7 +83,7 @@ export default function CreateCard({ section }) {
 
                     <div className="flex justify-end gap-4 pt-4">
                         <Link href={route('sections.indexAdmin')}>
-                            <Button variant="outline" type="button">Cancel</Button>
+                            <Button variant="outline" type="button">إلغاء</Button>
                         </Link>
                         <Button type="submit" disabled={processing} className="bg-purple-600 hover:bg-purple-700">
                             Create Card

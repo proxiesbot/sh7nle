@@ -20,8 +20,8 @@ export default function Create({ section = null }) {
     };
 
     return (
-        <AdminLayout title={section ? `إضافة قسم فرعي داخل ${section.name}` : 'Create New Section'}>
-            <Head title={section ? `Add Sub Section to ${section.name}` : 'Create Section'} />
+        <AdminLayout title={section ? `إضافة قسم فرعي داخل ${section.name}` : 'إنشاء قسم جديد'}>
+            <Head title={section ? `Add Sub Section to ${section.name}` : 'إنشاء قسم'} />
 
             <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <form onSubmit={submit} className="space-y-6">
@@ -79,10 +79,10 @@ export default function Create({ section = null }) {
 
                     <div className="flex justify-end gap-4 pt-4">
                         <Link href={section ? route('sections.manage', section.id) : route('sections.indexAdmin')}>
-                            <Button variant="outline" type="button">Cancel</Button>
+                            <Button variant="outline" type="button">إلغاء</Button>
                         </Link>
                         <Button type="submit" disabled={processing} className="bg-purple-600 hover:bg-purple-700">
-                            Create Section
+                            إنشاء القسم
                         </Button>
                     </div>
                 </form>

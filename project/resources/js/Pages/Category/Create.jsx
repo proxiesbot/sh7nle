@@ -66,9 +66,9 @@ export default function Create() {
 
                     <div className="flex items-center justify-end gap-4">
                         {/* No index route for admin, so maybe back to dashboard or sections? I'll link to dashboard for now or just back */}
-                        <Button variant="outline" type="button" onClick={() => window.history.back()}>Cancel</Button>
+                        <Button variant="outline" type="button" onClick={() => window.history.back()}>إلغاء</Button>
                         <Button type="submit" disabled={processing} className="bg-purple-600 hover:bg-purple-700">
-                            Create Category
+                            إنشاء التصنيف
                         </Button>
                     </div>
                 </form>

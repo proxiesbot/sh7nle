@@ -71,10 +71,10 @@ export default function Edit({ notification, users }) {
 
                     <div className="flex items-center justify-end gap-4">
                         <Link href={route('notification.index')}>
-                            <Button variant="outline" type="button">Cancel</Button>
+                            <Button variant="outline" type="button">إلغاء</Button>
                         </Link>
                         <Button type="submit" disabled={processing} className="bg-purple-600 hover:bg-purple-700">
-                            Update Notification
+                            تحديث الإشعار
                         </Button>
                     </div>
                 </form>

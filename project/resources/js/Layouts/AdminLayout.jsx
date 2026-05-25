@@ -100,7 +100,7 @@ export default function AdminLayout({ children, title }) {
                             </div>
                         </div>
                         <Button asChild variant="destructive" className="w-full rounded-2xl">
-                            <Link href="/logout" method="post" as="button">Logout</Link>
+                            <Link href="/logout" method="post" as="button">تسجيل الخروج</Link>
                         </Button>
                     </div>
                 </aside>

@@ -27,7 +27,7 @@ export default function BuyCardModal({ card, onClose }) {
     const minAmount = Number(card.minAmount ?? 1);
     const maxAmount = Number(card.maxAmount ?? minAmount);
     const quantityLabel = card.quantity_label || t.chooseQuantity;
-    const playerIdLabel = card.player_id_label || 'Player ID';
+    const playerIdLabel = card.player_id_label || 'معرّف اللاعب';
     const requiresPlayerId = Boolean(card.requires_player_id);
     const requiresSecondaryId = Boolean(card.requires_secondary_player_id);
     const secondaryPlayerIdLabel = card.secondary_player_id_label || 'Server / Secondary ID';
