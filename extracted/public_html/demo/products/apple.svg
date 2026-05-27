@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" fill="none">
+<rect width="800" height="800" rx="48" fill="#111827"/>
+<path d="M472 228c24-30 42-72 37-113-35 3-77 24-101 54-22 27-41 70-35 111 39 3 76-19 99-52Z" fill="white"/>
+<path d="M551 429c0-95 78-140 82-143-45-65-116-74-141-75-60-6-117 35-148 35s-79-34-130-33c-67 1-129 39-164 98-71 122-18 303 51 403 34 49 75 104 129 102 52-2 72-33 136-33s82 33 137 32c56-1 92-51 126-100 39-57 55-113 56-116-1 0-134-52-134-170Z" fill="white"/>
+<text x="400" y="660" fill="white" font-family="Arial, sans-serif" font-size="54" font-weight="800" text-anchor="middle">Apple Gift Card</text>
+</svg>
