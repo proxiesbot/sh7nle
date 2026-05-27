@@ -24,7 +24,7 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
-        if ($request->user() && \Illuminate\Support\Facades\Schema::hasColumn('users', 'last_seen_at')) {
+        if ($request->user() && !$isAuthPage && \Illuminate\Support\Facades\Schema::hasColumn('users', 'last_seen_at')) {
             $lastSeen = $request->user()->last_seen_at;
             if (! $lastSeen || now()->diffInSeconds($lastSeen) > 60) {
                 $request->user()->forceFill(['last_seen_at' => now()])->saveQuietly();
@@ -43,37 +43,37 @@ class HandleInertiaRequests extends Middleware
                 'warning' => fn () => $request->session()->get('warning'),
                 'error' => fn () => $request->session()->get('error'),
             ],
-            'storeSections' => fn () => (! $isAuthPage && Schema::hasTable('sections'))
+            'storeSections' => fn () => $isAuthPage ? collect() : (Schema::hasTable('sections')
                 ? Section::query()
                     ->where('section_id', 0)
                     ->orderBy('name')
                     ->get(['id', 'name', 'icon'])
-                : collect(),
-            'activeBanner' => fn () => (! $isAuthPage && Schema::hasTable('banners'))
+                : collect()),
+            'activeBanner' => fn () => $isAuthPage ? null : (Schema::hasTable('banners')
                 ? Banner::query()
                     ->where('is_active', true)
                     ->orderBy('sort_order')
                     ->latest()
                     ->first()
-                : null,
-            'activeBanners' => fn () => (! $isAuthPage && Schema::hasTable('banners'))
+                : null),
+            'activeBanners' => fn () => $isAuthPage ? collect() : (Schema::hasTable('banners')
                 ? Banner::query()
                     ->where('is_active', true)
                     ->orderBy('sort_order')
                     ->get()
-                : collect(),
+                : collect()),
             'siteSettings' => fn () => $isAuthPage ? [] : Setting::publicSettings(),
-            'contentTexts' => fn () => (! $isAuthPage && Schema::hasTable('content_texts'))
+            'contentTexts' => fn () => $isAuthPage ? collect() : (Schema::hasTable('content_texts')
                 ? ContentText::query()->pluck('text', 'key')
-                : collect(),
-            'socialLinks' => fn () => [
+                : collect()),
+            'socialLinks' => fn () => $isAuthPage ? [] : [
                 'whatsapp' => Setting::get('social.whatsapp_url', env('SOCIAL_WHATSAPP_URL')),
                 'instagram' => Setting::get('social.instagram_url', env('SOCIAL_INSTAGRAM_URL')),
                 'telegram' => Setting::get('social.telegram_url', env('SOCIAL_TELEGRAM_URL')),
                 'facebook' => Setting::get('social.facebook_url', env('SOCIAL_FACEBOOK_URL')),
                 'support' => Setting::get('social.support_url', ''),
             ],
-            'adminCounters' => fn () => [
+            'adminCounters' => fn () => $isAuthPage ? [] : [
                 'pendingDeposits' => Schema::hasTable('deposits') ? Deposit::query()->where('status', 0)->count() : 0,
                 'pendingOrders' => Schema::hasTable('payments') ? Payment::query()->whereIn('status', [0, 2])->count() : 0,
             ],

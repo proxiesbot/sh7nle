@@ -10,16 +10,31 @@ use Throwable;
 
 class RecordLoginActivity
 {
+    /**
+     * Cache schema checks to avoid repeated DB queries on each login.
+     */
+    protected static ?bool $tableExists = null;
+    protected static ?bool $lastSeenColumn = null;
+    protected static ?bool $securityColumn = null;
+
     public function handle(Login $event): void
     {
-        if (! Schema::hasTable('login_activities') || ! $event->user) {
+        if (! $event->user) {
+            return;
+        }
+
+        // Cache the schema check so we don't hit information_schema every login
+        if (self::$tableExists === null) {
+            self::$tableExists = Schema::hasTable('login_activities');
+        }
+
+        if (! self::$tableExists) {
             return;
         }
 
         $request = request();
         $userAgent = (string) $request->userAgent();
         $ip = (string) $request->ip();
-        $fingerprint = substr(sha1($userAgent.'|'.$ip), 0, 16);
 
         $isNewDevice = ! LoginActivity::query()
             ->where('user_id', $event->user->id)
@@ -38,20 +53,35 @@ class RecordLoginActivity
             'is_new_device' => $isNewDevice,
         ]);
 
-        if (Schema::hasColumn('users', 'last_seen_at')) {
+        // Update last_seen_at (cached column check)
+        if (self::$lastSeenColumn === null) {
+            self::$lastSeenColumn = Schema::hasColumn('users', 'last_seen_at');
+        }
+        if (self::$lastSeenColumn) {
             $event->user->forceFill(['last_seen_at' => now()])->saveQuietly();
         }
 
-        if ($isNewDevice && $event->user->email && Schema::hasColumn('users', 'last_security_confirmation_sent_at')) {
-            $lastSent = $event->user->last_security_confirmation_sent_at;
-            if (! $lastSent || now()->diffInMinutes($lastSent) > 30) {
-                $event->user->forceFill(['last_security_confirmation_sent_at' => now()])->saveQuietly();
-                try {
-                    Mail::raw("تم تسجيل دخول جديد إلى حسابك في Sh7nle.\n\nIP: {$ip}\nDevice: ".$this->deviceType($userAgent)."\nBrowser: ".$this->browser($userAgent)."\n\nإذا لم تكن أنت، غيّر كلمة المرور فورًا.", function ($message) use ($event) {
-                        $message->to($event->user->email)->subject('تنبيه أمان: تسجيل دخول جديد إلى حساب Sh7nle');
-                    });
-                } catch (Throwable $exception) {
-                    report($exception);
+        // Send security email only for new devices - non-blocking (try/catch with minimal work)
+        if ($isNewDevice && $event->user->email) {
+            if (self::$securityColumn === null) {
+                self::$securityColumn = Schema::hasColumn('users', 'last_security_confirmation_sent_at');
+            }
+
+            if (self::$securityColumn) {
+                $lastSent = $event->user->last_security_confirmation_sent_at;
+                if (! $lastSent || now()->diffInMinutes($lastSent) > 30) {
+                    $event->user->forceFill(['last_security_confirmation_sent_at' => now()])->saveQuietly();
+                    try {
+                        Mail::raw(
+                            "تم تسجيل دخول جديد إلى حسابك في Sh7nle.\n\nIP: {$ip}\nDevice: " . $this->deviceType($userAgent) . "\nBrowser: " . $this->browser($userAgent) . "\n\nإذا لم تكن أنت، غيّر كلمة المرور فورًا.",
+                            function ($message) use ($event) {
+                                $message->to($event->user->email)->subject('تنبيه أمان: تسجيل دخول جديد إلى حساب Sh7nle');
+                            }
+                        );
+                    } catch (Throwable $exception) {
+                        // Don't block login if mail fails
+                        report($exception);
+                    }
                 }
             }
         }
