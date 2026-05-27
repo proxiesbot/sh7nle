@@ -1,0 +1,23 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  <circle cx="92" cy="90" r="78" fill="white" fill-opacity="0.13"/>
+  <circle cx="415" cy="410" r="118" fill="white" fill-opacity="0.10"/>
+  <rect x="78" y="136" width="356" height="240" rx="40" fill="white" fill-opacity="0.94"/>
+  <rect x="78" y="190" width="356" height="56" fill="#0F172A" fill-opacity="0.92"/>
+  <path d="M256 138V376" stroke="url(#line)" stroke-width="18" stroke-linecap="round"/>
+  <path d="M162 244H350" stroke="url(#line)" stroke-width="18" stroke-linecap="round"/>
+  <path d="M228 135C197 92 142 96 140 137C138 176 204 176 256 155C308 176 374 176 372 137C370 96 315 92 284 135" stroke="#7C3AED" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="256" y="322" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" font-weight="900" fill="#111827">Sh7nle</text>
+  <text x="256" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#64748B">GIFT CARD</text>
+  <defs>
+    <linearGradient id="bg" x1="38" y1="42" x2="469" y2="467" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0EA5E9"/>
+      <stop offset="0.52" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="line" x1="162" y1="135" x2="350" y2="376" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0EA5E9"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+</svg>

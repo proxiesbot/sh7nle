@@ -1,0 +1,580 @@
+### ===========================================
+### AUTHENTICATION ENDPOINTS - COMPREHENSIVE TESTS
+### ===========================================
+###
+### This file tests Laravel Fortify authentication endpoints
+### Test both success and failure cases for each endpoint
+###
+### SETUP:
+### 1. Make sure your Laravel app is running (php artisan serve)
+### 2. Update @baseUrl below to match your server
+### 3. Database should be migrated and seeded
+###
+### ===========================================
+
+@baseUrl = http://localhost:8000
+@apiPrefix = 
+@testEmail = testuser@example.com
+@testPassword = Password123!
+@testName = Test User
+
+
+### ===========================================
+### 1. REGISTRATION TESTS
+### ===========================================
+
+### Test 1.1: Successful Registration
+POST {{baseUrl}}{{apiPrefix}}/register HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "name": "{{testName}}",
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}",
+  "password_confirmation": "{{testPassword}}",
+  "terms": true
+}
+
+###
+
+### Test 1.2: Registration - Missing Required Fields
+POST {{baseUrl}}{{apiPrefix}}/register HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "name": "",
+  "email": "",
+  "password": ""
+}
+
+###
+
+### Test 1.3: Registration - Invalid Email Format
+POST {{baseUrl}}{{apiPrefix}}/register HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "name": "Test User",
+  "email": "invalid-email",
+  "password": "{{testPassword}}",
+  "password_confirmation": "{{testPassword}}"
+}
+
+###
+
+### Test 1.4: Registration - Password Mismatch
+POST {{baseUrl}}{{apiPrefix}}/register HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "name": "Test User",
+  "email": "newuser@example.com",
+  "password": "{{testPassword}}",
+  "password_confirmation": "DifferentPassword123!"
+}
+
+###
+
+### Test 1.5: Registration - Duplicate Email
+POST {{baseUrl}}{{apiPrefix}}/register HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "name": "Another User",
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}",
+  "password_confirmation": "{{testPassword}}"
+}
+
+###
+
+### Test 1.6: Registration - Weak Password (if validation exists)
+POST {{baseUrl}}{{apiPrefix}}/register HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "name": "Test User",
+  "email": "weakpass@example.com",
+  "password": "123",
+  "password_confirmation": "123"
+}
+
+###
+
+
+### ===========================================
+### 2. LOGIN TESTS
+### ===========================================
+
+### Test 2.1: Successful Login
+POST {{baseUrl}}{{apiPrefix}}/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}",
+  "remember": false
+}
+
+###
+
+### Test 2.2: Login - Invalid Credentials (Wrong Password)
+POST {{baseUrl}}{{apiPrefix}}/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": "{{testEmail}}",
+  "password": "WrongPassword123!"
+}
+
+###
+
+### Test 2.3: Login - Non-existent Email
+POST {{baseUrl}}{{apiPrefix}}/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": "nonexistent@example.com",
+  "password": "{{testPassword}}"
+}
+
+###
+
+### Test 2.4: Login - Missing Email
+POST {{baseUrl}}{{apiPrefix}}/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": "",
+  "password": "{{testPassword}}"
+}
+
+###
+
+### Test 2.5: Login - Missing Password
+POST {{baseUrl}}{{apiPrefix}}/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": "{{testEmail}}",
+  "password": ""
+}
+
+###
+
+### Test 2.6: Login with Remember Me
+POST {{baseUrl}}{{apiPrefix}}/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}",
+  "remember": true
+}
+
+###
+
+
+### ===========================================
+### 3. LOGOUT TEST
+### ===========================================
+### Note: You'll need to be authenticated first (run successful login)
+
+### Test 3.1: Successful Logout
+POST {{baseUrl}}{{apiPrefix}}/logout HTTP/1.1
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+Cookie: XSRF-TOKEN=YOUR_TOKEN_HERE; laravel_session=YOUR_SESSION_HERE
+
+###
+
+### Test 3.2: Logout - Unauthenticated User
+POST {{baseUrl}}{{apiPrefix}}/logout HTTP/1.1
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+###
+
+
+### ===========================================
+### 4. FORGOT PASSWORD TESTS
+### ===========================================
+
+### Test 4.1: Successful Forgot Password Request
+POST {{baseUrl}}{{apiPrefix}}/forgot-password HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": "{{testEmail}}"
+}
+
+###
+
+### Test 4.2: Forgot Password - Non-existent Email
+POST {{baseUrl}}{{apiPrefix}}/forgot-password HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": "nonexistent@example.com"
+}
+
+###
+
+### Test 4.3: Forgot Password - Invalid Email Format
+POST {{baseUrl}}{{apiPrefix}}/forgot-password HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": "invalid-email-format"
+}
+
+###
+
+### Test 4.4: Forgot Password - Missing Email
+POST {{baseUrl}}{{apiPrefix}}/forgot-password HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": ""
+}
+
+###
+
+
+### ===========================================
+### 5. RESET PASSWORD TESTS
+### ===========================================
+### Note: You'll need a valid reset token from the forgot password email
+
+@resetToken = PASTE_TOKEN_FROM_EMAIL_HERE
+
+### Test 5.1: Successful Password Reset
+POST {{baseUrl}}{{apiPrefix}}/reset-password HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "token": "{{resetToken}}",
+  "email": "{{testEmail}}",
+  "password": "NewPassword123!",
+  "password_confirmation": "NewPassword123!"
+}
+
+###
+
+### Test 5.2: Reset Password - Invalid Token
+POST {{baseUrl}}{{apiPrefix}}/reset-password HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "token": "invalid-token-12345",
+  "email": "{{testEmail}}",
+  "password": "NewPassword123!",
+  "password_confirmation": "NewPassword123!"
+}
+
+###
+
+### Test 5.3: Reset Password - Password Mismatch
+POST {{baseUrl}}{{apiPrefix}}/reset-password HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "token": "{{resetToken}}",
+  "email": "{{testEmail}}",
+  "password": "NewPassword123!",
+  "password_confirmation": "DifferentPassword123!"
+}
+
+###
+
+### Test 5.4: Reset Password - Missing Token
+POST {{baseUrl}}{{apiPrefix}}/reset-password HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": "{{testEmail}}",
+  "password": "NewPassword123!",
+  "password_confirmation": "NewPassword123!"
+}
+
+###
+
+
+### ===========================================
+### 6. EMAIL VERIFICATION TESTS
+### ===========================================
+### Note: Requires authenticated user with unverified email
+
+### Test 6.1: Get Email Verification Notice (Unauthenticated)
+GET {{baseUrl}}{{apiPrefix}}/email/verify HTTP/1.1
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+###
+
+### Test 6.2: Resend Verification Email
+POST {{baseUrl}}{{apiPrefix}}/email/verification-notification HTTP/1.1
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+Cookie: XSRF-TOKEN=YOUR_TOKEN_HERE; laravel_session=YOUR_SESSION_HERE
+
+###
+
+### Test 6.3: Resend Verification Email - Unauthenticated
+POST {{baseUrl}}{{apiPrefix}}/email/verification-notification HTTP/1.1
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+###
+
+### Test 6.4: Verify Email with Link (GET)
+### Note: Replace {id} and {hash} with actual values from verification email
+GET {{baseUrl}}{{apiPrefix}}/email/verify/1/HASH_FROM_EMAIL?expires=TIMESTAMP&signature=SIGNATURE HTTP/1.1
+Accept: application/json
+Cookie: XSRF-TOKEN=YOUR_TOKEN_HERE; laravel_session=YOUR_SESSION_HERE
+
+###
+
+
+### ===========================================
+### 7. USER PROFILE / CURRENT USER TESTS
+### ===========================================
+
+### Test 7.1: Get Current Authenticated User (Sanctum API)
+GET {{baseUrl}}/api/user HTTP/1.1
+Accept: application/json
+Authorization: Bearer YOUR_API_TOKEN_HERE
+
+###
+
+### Test 7.2: Get Current User - Unauthenticated
+GET {{baseUrl}}/api/user HTTP/1.1
+Accept: application/json
+
+###
+
+
+### ===========================================
+### 8. TWO-FACTOR AUTHENTICATION TESTS
+### ===========================================
+### Note: Requires 2FA to be enabled for the user
+
+### Test 8.1: Enable Two-Factor Authentication
+POST {{baseUrl}}/user/two-factor-authentication HTTP/1.1
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+Cookie: XSRF-TOKEN=YOUR_TOKEN_HERE; laravel_session=YOUR_SESSION_HERE
+
+###
+
+### Test 8.2: Get Two-Factor QR Code
+GET {{baseUrl}}/user/two-factor-qr-code HTTP/1.1
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+Cookie: XSRF-TOKEN=YOUR_TOKEN_HERE; laravel_session=YOUR_SESSION_HERE
+
+###
+
+### Test 8.3: Get Two-Factor Secret Key
+GET {{baseUrl}}/user/two-factor-secret-key HTTP/1.1
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+Cookie: XSRF-TOKEN=YOUR_TOKEN_HERE; laravel_session=YOUR_SESSION_HERE
+
+###
+
+### Test 8.4: Get Two-Factor Recovery Codes
+GET {{baseUrl}}/user/two-factor-recovery-codes HTTP/1.1
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+Cookie: XSRF-TOKEN=YOUR_TOKEN_HERE; laravel_session=YOUR_SESSION_HERE
+
+###
+
+### Test 8.5: Confirm Two-Factor Authentication
+POST {{baseUrl}}/user/confirmed-two-factor-authentication HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+Cookie: XSRF-TOKEN=YOUR_TOKEN_HERE; laravel_session=YOUR_SESSION_HERE
+
+{
+  "code": "123456"
+}
+
+###
+
+### Test 8.6: Confirm 2FA - Invalid Code
+POST {{baseUrl}}/user/confirmed-two-factor-authentication HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+Cookie: XSRF-TOKEN=YOUR_TOKEN_HERE; laravel_session=YOUR_SESSION_HERE
+
+{
+  "code": "000000"
+}
+
+###
+
+### Test 8.7: Two-Factor Challenge - Valid Code
+POST {{baseUrl}}{{apiPrefix}}/two-factor-challenge HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "code": "123456"
+}
+
+###
+
+### Test 8.8: Two-Factor Challenge - Recovery Code
+POST {{baseUrl}}{{apiPrefix}}/two-factor-challenge HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "recovery_code": "recovery-code-here"
+}
+
+###
+
+### Test 8.9: Disable Two-Factor Authentication
+DELETE {{baseUrl}}/user/two-factor-authentication HTTP/1.1
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+Cookie: XSRF-TOKEN=YOUR_TOKEN_HERE; laravel_session=YOUR_SESSION_HERE
+
+###
+
+
+### ===========================================
+### 9. GOOGLE OAUTH TESTS
+### ===========================================
+
+### Test 9.1: Redirect to Google OAuth
+GET {{baseUrl}}/auth/google HTTP/1.1
+Accept: text/html
+
+###
+
+### Test 9.2: Google OAuth Callback (manual test required)
+### Note: This should be tested in a browser
+### URL: {{baseUrl}}/auth/google/callback
+###
+
+
+### ===========================================
+### 10. RATE LIMITING TESTS
+### ===========================================
+
+### Test 10.1: Rate Limit - Multiple Login Attempts
+### Run this multiple times quickly (>5 times in a minute)
+POST {{baseUrl}}{{apiPrefix}}/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "email": "{{testEmail}}",
+  "password": "WrongPassword"
+}
+
+###
+
+
+### ===========================================
+### 11. CSRF PROTECTION TESTS
+### ===========================================
+
+### Test 11.1: Get CSRF Token
+GET {{baseUrl}}/sanctum/csrf-cookie HTTP/1.1
+
+###
+
+### Test 11.2: Login without CSRF Token (should fail for web routes)
+POST {{baseUrl}}{{apiPrefix}}/login HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}"
+}
+
+###
+
+
+### ===========================================
+### NOTES FOR TESTING
+### ===========================================
+###
+### 1. For authenticated requests, you need to:
+###    - First run successful login test
+###    - Copy cookies from response (XSRF-TOKEN and laravel_session)
+###    - Paste them in the Cookie header
+###
+### 2. For API token requests (Sanctum):
+###    - Create a token via Laravel Tinker: User::find(1)->createToken('test')->plainTextToken
+###    - Use it in Authorization: Bearer YOUR_TOKEN header
+###
+### 3. Expected Response Codes:
+###    - 200/201: Success
+###    - 302/303: Redirect (for web routes)
+###    - 401: Unauthenticated
+###    - 403: Forbidden
+###    - 419: CSRF token mismatch
+###    - 422: Validation error
+###    - 429: Too many requests (rate limit)
+###
+### 4. Email Verification:
+###    - Check your email or use a tool like Mailtrap
+###    - Or check database: password_reset_tokens table
+###
+### 5. For Google OAuth:
+###    - Must be tested in a browser due to redirect flow
+###    - Ensure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are set in .env
+###
+### ===========================================
